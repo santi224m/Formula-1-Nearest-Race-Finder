@@ -23,7 +23,7 @@ int main() {
     double latitude = std::stod(lat_str);
     double longitude = std::stod(lon_str);
 
-    // Pase time  into tm stuct
+    // Parse time  into tm stuct
     std::tm parsedTime = {};
     std::istringstream tmss(date);
     tmss >> std::get_time(&parsedTime, "%Y-%m-%d");
