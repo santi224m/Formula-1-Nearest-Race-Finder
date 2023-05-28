@@ -40,6 +40,8 @@ This will find the nearest Formula 1 race to the coordinates (33.8823 -117.8827)
 
 This program will be implemented using a quadtree data structure to store the locations of all the Formula 1 races. The locations will be stored as latitude and longitude coordinates.
 
+![image](./img/Grid-1.png)
+
 ### Quadtree Construction
 
 The quadtree will be constructed based on the minimum and maximum latitude and longitude values of the locations in the dataset. This will allow the quadtree to be as small as possible while still encompassing all the locations.
