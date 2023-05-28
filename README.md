@@ -35,3 +35,35 @@ You can use the application from the command-line like so:
 ```
 
 This will find the nearest Formula 1 race to the coordinates (33.8823 -117.8827).
+
+## Implementation
+
+This program will be implemented using a grid data structure to store the locations of all the Formula 1 races. The locations will be stored as latitude and longitude coordinates.
+
+### Grid Construction
+
+The grid will be constructed based on the minimum and maximum latitude and longitude values of the locations in the dataset. This will allow the grid to be as small as possible while still encompassing all the locations.
+
+#### Nearest Neighbor Search
+
+The program will perform a nearest neighbor search on the grid to find the Formula 1 race closest to the user's location.
+
+#### Output
+
+Once the nearest race is found, the program will display relevant information about the race to the user, including the name of the race, the date it will be held, and the distance from the user's location.
+
+#### Race structure
+
+```cpp
+Race {
+  String: race_name
+  String: circuit_name
+  Coordinate: coordinate
+  Date: date  // using standard library tm struct
+}
+
+Coordinate {
+  Double: latitude
+  Double: longitude
+}
+```
