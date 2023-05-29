@@ -38,7 +38,7 @@ This will find the nearest Formula 1 race to the coordinates (33.8823 -117.8827)
 
 ## Implementation
 
-This program will be implemented using a quadtree data structure to store the locations of all the Formula 1 races. The locations will be stored as latitude and longitude coordinates.
+This program will be implemented using a quadtree data structure to store the locations of all the Formula 1 races. The locations will be stored as latitude and longitude coordinates. You can see the desmos graph below [here](https://www.desmos.com/calculator/gyz7rbaqzo).
 
 ![image](./img/Grid.png)
 
