@@ -53,6 +53,14 @@ class QuadTreeNode {
   }
   std::vector<Race> getRaces() const { return races_; }
   void emptyRaces() { this->races_.clear(); }
+  size_t getRacesSize() { return this->races_.size(); }
+  double getRaceXAt(size_t i) { return this->races_[i].coordinate.longitude; }
+  double getRaceYAt(size_t i) { return this->races_[i].coordinate.latitude; }
+
+  // Remove Race at index i from races_ vector
+  void removeRaceAt(size_t i) {
+    this->races_.erase(this->races_.begin() + i);
+  }
 
  private:
   bool isLeaf_ = true;
@@ -83,6 +91,59 @@ class QuadTree {
     this->nodeInsert(this->rootNode, race);
   }
 
+  // Wrapper function for deleteNode function
+  bool remove(double x, double y) {
+    if (x < this->rootNode->XMin() || x > this->rootNode->XMax())
+      return false;
+    if (y < this->rootNode->YMin() || y > this->rootNode->YMax())
+      return false;
+    return this->deleteNode(this->rootNode,x,y);
+  }
+
+  bool remove(Race r) {
+    return this->remove(r.coordinate.longitude, r.coordinate.latitude);
+  }
+
+  bool deleteNode(QuadTreeNode* node, double x, double y) {
+    if (node->isLeaf()) {
+      for (size_t i = 0; i < node->getRacesSize(); i++) {
+        if (node->getRaceXAt(i) == x && node->getRaceYAt(i) == y) {
+          node->removeRaceAt(i);
+          node->decrementNumPoints();
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // Determine the bin where the race should be located
+    float XBinSize = (node->XMax() - node->XMin()) / 2.0;
+    float YBinSize = (node->YMax() - node->YMin()) / 2.0;
+    int XBin = (x - node->XMin()) / XBinSize;
+    int YBin = (y - node->YMin()) / YBinSize;
+
+    if (node->childrenAt(XBin, YBin) == nullptr)
+      return false;
+
+    if (this->deleteNode(node->childrenAt(XBin, YBin), x, y)) {
+      node->decrementNumPoints();
+      if (node->childrenAt(XBin, YBin)->numPoints() == 0) {
+        node->setChildrenAt(XBin, YBin, nullptr);
+      }
+      if (node->numPoints() <= 4) {
+        std::vector<Race> tmp_races = this->collapseNode(node);
+        for (Race r : tmp_races) {
+          node->addRace(r);
+        }
+      }
+
+      return true;
+    }
+
+    return false;
+  }
+
+ private:
   void nodeInsert(QuadTreeNode* node, Race& race) {
     double x = race.coordinate.longitude;
     double y = race.coordinate.latitude;
@@ -122,8 +183,32 @@ class QuadTree {
     }
   }
 
-  private:
-    QuadTreeNode* rootNode;
+
+  // Helper function for deleteNode method
+  // Collapses a node that no longer meets criterial for a node
+  std::vector<Race> collapseNode(QuadTreeNode* node) {
+    if (node->isLeaf())
+      return node->getRaces();
+
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 2; j++) {
+        if (node->childrenAt(i,j) == nullptr) {
+          std::vector<Race> sub_pts = this->collapseNode(node->childrenAt(i,j));
+          for (Race r : sub_pts) {
+            node->addRace(r);
+          }
+          node->setChildrenAt(i,j,nullptr);
+        }
+      }
+    }
+
+    node->setIsLeaf(true);
+    return node->getRaces();
+  }
+
+
+
+  QuadTreeNode* rootNode;
 };
 
 #endif  // QUADTREE_H

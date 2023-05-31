@@ -33,5 +33,18 @@ int main() {
     qt.insert(r);
   }
 
+  // Remove Italian GP
+  qt.remove(11.7159,44.3449);
+  // Remove British GP
+  qt.remove(-1.0169,52.0786);
+
+  std::tm t = {};
+  t.tm_year = 2023;
+  t.tm_mon = 10;
+  t.tm_mday = 22;
+  Race las_vegas_gp("Las Vegas Grand Prix", "Las Vegas", {36.1175, -115.1614}, t);
+
+  qt.remove(las_vegas_gp);
+
   return 0;
 }
