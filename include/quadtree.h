@@ -100,10 +100,6 @@ class QuadTree {
     return this->deleteNode(this->rootNode,x,y);
   }
 
-  bool remove(Race r) {
-    return this->remove(r.coordinate.longitude, r.coordinate.latitude);
-  }
-
   bool deleteNode(QuadTreeNode* node, double x, double y) {
     if (node->isLeaf()) {
       for (size_t i = 0; i < node->getRacesSize(); i++) {
@@ -141,6 +137,15 @@ class QuadTree {
     }
 
     return false;
+  }
+
+  // Helper function that computes distance from a point to a node
+  float minDistance(QuadTreeNode* node,  double x, double y) {
+    float x_dist = 0.0;
+    if (x < node->XMin())
+      x_dist = node->XMin() - x;
+    if (x > node->XMax())
+      x_dist = x - node->XMax();
   }
 
  private:
