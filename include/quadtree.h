@@ -54,6 +54,7 @@ class QuadTreeNode {
     this->races_.push_back(race);
   }
   std::vector<Race> getRaces() const { return races_; }
+  std::vector<Race>& getRacesRef() {return races_; }
   void emptyRaces() { this->races_.clear(); }
   size_t getRacesSize() { return this->races_.size(); }
   double getRaceXAt(size_t i) { return this->races_[i].coordinate.longitude; }
@@ -258,7 +259,7 @@ class QuadTree {
 
     // If we are in a leaf, search race coordinates
     if (node->isLeaf()) {
-      for (Race race : node->getRaces()) {
+      for (Race& race : node->getRacesRef()) {
         float dist = this->haversineDist(y, x, race.coordinate.latitude,
             race.coordinate.longitude);
 
