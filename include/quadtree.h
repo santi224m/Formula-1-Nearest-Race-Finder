@@ -266,9 +266,9 @@ class QuadTree {
         if (dist < best_dist) {
           best_dist = dist;
           best_candidate = &race;
-          return best_candidate;
         }
       }
+      return best_candidate;
     }
 
     // Recursively check all 4 children starting with the closest.
@@ -285,15 +285,23 @@ class QuadTree {
       y_bin = 0;
     if (y_bin > 1)
       y_bin = 1;
+
+    int x_bins[2];
+    x_bins[0] = x_bin;
+    x_bins[1] = (x_bin + 1) % 2;
+
+    int y_bins[2];
+    y_bins[0] = y_bin;
+    y_bins[1] = (y_bin + 1) % 2;
     
-    for (int i = 0; i < 2; i++) {
-      for (int j = 0; j < 2; j++) {
+    for (int i : x_bins) {
+      for (int j : y_bins) {
         if (node->childrenAt(i, j) != nullptr) {
           Race* quad_best = this->nearestNeighborNode(
                       node->childrenAt(i,j), x, y, best_dist);
           if (quad_best != nullptr) {
             best_candidate = quad_best;
-            best_dist = haversineDist(x, y, 
+            best_dist = haversineDist(y, x, 
               quad_best->coordinate.latitude, quad_best->coordinate.longitude);
           }
         }
