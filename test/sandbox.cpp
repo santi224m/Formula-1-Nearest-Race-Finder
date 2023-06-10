@@ -33,10 +33,7 @@ int main() {
     qt.insert(r);
   }
 
-  // Remove Italian GP
-  qt.remove(11.7159,44.3449);
-  // Remove British GP
-  qt.remove(-1.0169,52.0786);
+  Race* n = qt.nearestNeighbor(-117.8827, 33.8823);
 
   return 0;
 }

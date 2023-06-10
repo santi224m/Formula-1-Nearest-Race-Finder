@@ -3,8 +3,10 @@
 
 #include "./race.h"
 
-#include <vector>
+#include <cmath>
+#include <limits>
 #include <stdexcept>
+#include <vector>
 
 class QuadTreeNode {
  public:
@@ -139,13 +141,9 @@ class QuadTree {
     return false;
   }
 
-  // Helper function that computes distance from a point to a node
-  float minDistance(QuadTreeNode* node,  double x, double y) {
-    float x_dist = 0.0;
-    if (x < node->XMin())
-      x_dist = node->XMin() - x;
-    if (x > node->XMax())
-      x_dist = x - node->XMax();
+  // Wrapper that passes along root node and initial infinite best distance
+  Race* nearestNeighbor(float x, float y) {
+    return this->nearestNeighborNode(this->rootNode, x, y, std::numeric_limits<float>::infinity());
   }
 
  private:
@@ -211,9 +209,101 @@ class QuadTree {
     return node->getRaces();
   }
 
+    // Helper function that computes distance from a point to a node
+  float minDistance(QuadTreeNode* node,  double x, double y) {
+    float x_dist = 0.0;
+    if (x < node->XMin())
+      x_dist = node->XMin() - x;
+    if (x > node->XMax())
+      x_dist = x - node->XMax();
 
+    float y_dist = 0.0;
+    if (y < node->YMin())
+      y_dist = node->YMin() - y;
+    if (y > node->YMax())
+      y_dist = y - node->YMax();
+
+    return std::sqrt(x_dist * x_dist + y_dist * y_dist);
+  }
+
+  // Convert degrees to radians
+  float toRadians(float degrees) {
+    return degrees * M_PI / 180.0;
+  }
+
+  // Calculate distance between two coordinates using Haversine formula
+  float haversineDist(float lat1, float lon1, float lat2, float  lon2) {
+    // Convert latitude and longitude to radians
+    float phi1 = this->toRadians(lat1);
+    float phi2 = this->toRadians(lat2);
+    float deltaPhi = this->toRadians(lat2 - lat1);
+    float deltaLambda = this->toRadians(lon2 - lon1);
+
+    // Apply Haversine formula
+    float a = std::sin(deltaPhi / 2.0) * std::sin(deltaPhi / 2.0) +
+              std::cos(phi1) * std::cos(phi2) *
+              std::sin(deltaLambda / 2.0) * std::sin(deltaLambda / 2.0);
+    float c = 2.0 * std::atan2(std::sqrt(a), std::sqrt(1.0 - a));
+    float distance = 6371.0 * c;  // Earth's mean radius in kilometers
+
+    return distance;
+  }
+
+  Race* nearestNeighborNode(QuadTreeNode* node, float x, float y, float best_dist) {
+    // Prune if node is farther than best distance
+    if (this->minDistance(node, x, y) >= best_dist)
+      return nullptr;
+    
+    Race* best_candidate = nullptr;
+
+    // If we are in a leaf, search race coordinates
+    if (node->isLeaf()) {
+      for (Race race : node->getRaces()) {
+        float dist = this->haversineDist(y, x, race.coordinate.latitude,
+            race.coordinate.longitude);
+
+        if (dist < best_dist) {
+          best_dist = dist;
+          best_candidate = &race;
+          return best_candidate;
+        }
+      }
+    }
+
+    // Recursively check all 4 children starting with the closest.
+    float x_bin_size = (node->XMax() - node->XMin()) / 2.0;
+    float y_bin_size = (node->YMax() - node->YMin()) / 2.0;
+    int x_bin = (x - node->XMin()) / x_bin_size;
+    if (x_bin < 0)
+      x_bin = 0;
+    if (x_bin > 1)
+      x_bin = 1;
+    
+    int y_bin = (y - node->YMin()) / y_bin_size;
+    if (y_bin < 0)
+      y_bin = 0;
+    if (y_bin > 1)
+      y_bin = 1;
+    
+    for (int i = 0; i < 2; i++) {
+      for (int j = 0; j < 2; j++) {
+        if (node->childrenAt(i, j) != nullptr) {
+          Race* quad_best = this->nearestNeighborNode(
+                      node->childrenAt(i,j), x, y, best_dist);
+          if (quad_best != nullptr) {
+            best_candidate = quad_best;
+            best_dist = haversineDist(x, y, 
+              quad_best->coordinate.latitude, quad_best->coordinate.longitude);
+          }
+        }
+      }
+    }
+
+    return best_candidate;
+  }
 
   QuadTreeNode* rootNode;
 };
+
 
 #endif  // QUADTREE_H
