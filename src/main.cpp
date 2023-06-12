@@ -1,4 +1,5 @@
 #include "../include/data_import.h"
+#include "../include/distance.h"
 #include "../include/input_validation.h"
 #include "../include/quadtree.h"
 #include "../include/race.h"
@@ -28,7 +29,7 @@ int main() {
     float userLong;
     inputValidation("Please enter your current longitude: ", userLong, MIN_LON, MAX_LON);
 
-    std::cout << "\nFinding the nearest race...\n" << std::endl;
+    std::cout << "Finding the nearest race..." << std::endl;
 
     Race* nearestRace = qt.nearestNeighbor(userLong, userLat);
 
@@ -40,8 +41,11 @@ int main() {
     std::cout << std::endl;
     std::cout << "Coordinates: [" << nearestRace->coordinate.latitude
           << ", " << nearestRace->coordinate.longitude << "]" << std::endl;
+    std::cout << "Distance: " << calculateDistanc(userLat, userLong,
+          nearestRace->coordinate.latitude, nearestRace->coordinate.longitude)
+          << "km\n" << std::endl;
 
-    std::cout << "Would you like to find another race? (yes/NO): ";
+    std::cout << "Would you like to find another race? (yes/no): ";
     std::string continueProgram;
     std::cin >> continueProgram;
     if (continueProgram != "yes") {
